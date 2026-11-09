@@ -10,6 +10,7 @@ paused = False
 pause_image = None
 inventory_open = False
 inventory_key_down = False
+item_select_image = None
 
 
 def handle_events():
@@ -34,6 +35,10 @@ def handle_events():
         elif event.type == SDL_KEYDOWN and event.key == SDLK_p:
             paused = not paused
             return
+        elif inventory_open and event.type == SDL_KEYDOWN and event.key in (
+                SDLK_0, SDLK_1, SDLK_2):
+            boy.ball_size = event.key - SDLK_0
+            continue
         elif paused:
             if event.type == SDL_KEYUP:
                 boy.handle_event(event)
@@ -45,12 +50,14 @@ def handle_events():
 
 def init():
     global boy, paused, pause_image, inventory_open, inventory_key_down
+    global item_select_image
 
     game_world.clear()
     paused = False
     inventory_open = False
     inventory_key_down = False
     pause_image = load_image('pause.png')
+    item_select_image = load_image('item_select.png')
     boy = Boy()
     game_world.add_oject(boy)
 
@@ -77,20 +84,15 @@ def render():
 def draw_inventory():
     draw_rectangle(530, 120, 780, 480, 20, 32, 52, 255, True)
     draw_rectangle(530, 120, 780, 480, 75, 195, 205, 255)
-    draw_rectangle(545, 410, 765, 450, 33, 54, 75, 255, True)
-    draw_rectangle(545, 400, 765, 402, 75, 195, 205, 255, True)
+    item_select_image.draw(655, 300, 220, 171)
 
-    for row in range(3):
-        for column in range(3):
-            left = 555 + column * 70
-            bottom = 175 + row * 70
-            draw_rectangle(left, bottom, left + 58, bottom + 58,
-                           38, 58, 78, 255, True)
-            draw_rectangle(left, bottom, left + 58, bottom + 58,
-                           100, 145, 160, 255)
+    choice_y = {0: 352, 1: 301, 2: 250}[boy.ball_size]
+    draw_rectangle(542, choice_y - 15, 768, choice_y + 15,
+                   75, 195, 205, 255)
 
 
 def finish():
-    global pause_image
+    global pause_image, item_select_image
     game_world.clear()
     del pause_image
+    del item_select_image
